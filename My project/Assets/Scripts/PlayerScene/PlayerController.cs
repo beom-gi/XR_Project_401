@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;         //UI 이벤트 관리하기 위해
 
 public class PlayerController : MonoBehaviour
 {
@@ -36,9 +37,12 @@ public class PlayerController : MonoBehaviour
             GetComponent<Rigidbody>().AddForce(Vector3.up * 10.0f, ForceMode.Impulse);
         }
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            projectileController.FireProjectile();
+        if (!EventSystem.current.IsPointerOverGameObject())
+        {   //게임 UI와 동시에 동작하지 않게 하기 위해 설정
+            if (Input.GetMouseButtonDown(0))
+            {
+                projectileController.FireProjectile();
+            }
         }
     }
 
