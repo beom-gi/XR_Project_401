@@ -4,11 +4,15 @@ using UnityEngine;
 
 public class ProjectileController : MonoBehaviour
 {
+    [SerializeField] protected SoundProfileData soundProfileData;
+
     public Vector3 launchDirection;
     public GameObject Projectile;
+    protected AudioManager AudioManager => AudioManager.Instance;
 
     public void FireProjectile()
     {
+        AudioManager.PlayOneShot(soundProfileData.GetRandomClip());
         GameObject temp = (GameObject)Instantiate(Projectile);
 
         temp.transform.position = this.gameObject.transform.position;
@@ -16,6 +20,7 @@ public class ProjectileController : MonoBehaviour
         temp.GetComponent<ProjectileMove>().launchDirection = transform.forward;
         temp.GetComponent<ProjectileMove>().projectileType = ProjectileMove.PROJECTILETYPE.PLAYER;
 
-        Destroy(temp, 10.0f);                   //10초후에 생성된 발사체 삭제
+        Destroy(temp, 10.0f);                   //10초후에 생성된 발사채 삭제
+
     }
 }
