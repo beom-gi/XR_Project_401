@@ -101,7 +101,7 @@ public class NestScrollManager : MonoBehaviour, IBeginDragHandler, IDragHandler,
                 else
                 {
                     BtnRect[i].sizeDelta = new Vector2(400, BtnRect[i].sizeDelta.y);
-                }
+                }       
             }
         }
     }
