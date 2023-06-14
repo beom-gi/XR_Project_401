@@ -4,12 +4,25 @@ using UnityEngine;
 using WebSocketSharp;               //C# 에서 웹 소켓을 지원하는 라이브러리
 using System.Text;
 using Newtonsoft.Json;              //JSON 을 사용하기위한 라이브러리 
+using UnityEngine.UI;               //UI를 통해서 패킷 변경
 
 public class MyData
 {
     public string clientID;                     //서버에서 제작해서 클라이언트에 접속시 줌
     public string message;
     public int requestType;                     // 요청번호 json으로 보냄
+}
+
+public class InfoData                           //서버에서 제작한 패킷 선언
+{
+    public string type;
+    public InfoParams myParams;
+}
+
+public class InfoParams                         ////서버에서 제작한 패킷 선언(내부)
+{
+    public string room;
+    public int loopTimeCount;
 }
 
 public class SocketClient : MonoBehaviour
@@ -21,9 +34,32 @@ public class SocketClient : MonoBehaviour
 
     MyData sendData = new MyData { message = "메세지 전송" };
 
+    public Button sendButton;                       //JSON 전송 버튼
+    public Button ReconnectButton;                  //연결이 끊어졌을때 다시 연결하는 버튼
+    public Text typeText;                           //메세지 종류 데이터를 받아와서 패킷에 보내기 위해 선언
+    public Text messageText;
+    public Text uiLoopCountText;                    //루프 카운트를 확인하기 위한 UI
+
+    public int loopCount;
+
     void Start()
     {
         ConnectWebSocekt();
+
+        sendButton.onClick.AddListener(() =>                            //SEND 버튼을 눌렀을 때
+        {
+            //JSON 데이터 생성
+            sendData.requestType = int.Parse(typeText.text);            //0, 10, 100, 200, 300
+            sendData.message = messageText.text;
+            string jsonData = JsonConvert.SerializeObject(sendData);
+
+            webSocket.Send(jsonData);               //webSocket으로 JSON 데이터 전송
+        });
+
+        ReconnectButton.onClick.AddListener(() =>
+        {
+            ConnectWebSocekt();
+        });
     }
 
     void ConnectWebSocekt()
@@ -49,6 +85,14 @@ public class SocketClient : MonoBehaviour
         Debug.Log("Received JSON data : " + jsonData);
 
         MyData receivedData = JsonConvert.DeserializeObject<MyData>(jsonData);          //JSON 데이터를 객체로 역직렬화
+
+        InfoData infoData = JsonConvert.DeserializeObject<InfoData>(jsonData);
+
+        if (infoData != null)
+        {
+            string room = infoData.myParams.room;
+            loopCount = infoData.myParams.loopTimeCount;
+        }
 
         if (receivedData != null && !string.IsNullOrEmpty(receivedData.clientID))        //receivedData 값이 비어 있지 않을 때
         {
@@ -94,6 +138,8 @@ public class SocketClient : MonoBehaviour
         {
             return;
         }
+
+        uiLoopCountText.text = "LoopCount : " + loopCount.ToString();
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
